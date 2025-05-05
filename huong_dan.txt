@@ -1,0 +1,87 @@
+Hướng Dẫn Sử Dụng Công Cụ Scraper Facebook
+
+Yêu Cầu Hệ Thống:
+1. Python 3.7 trở lên
+2. Google Chrome Browser
+3. Tài khoản Facebook đã đăng nhập trên Chrome
+
+Cài Đặt:
+
+1. Cài Đặt Python:
+   - Tải Python từ https://www.python.org/downloads/
+   - Khi cài đặt, nhớ TÍCH vào "Add Python to PATH"
+   - Kiểm tra cài đặt bằng cách mở Command Prompt và gõ:
+     python --version
+
+2. Cài Đặt Thư Viện:
+   - Mở Command Prompt và chạy các lệnh sau:
+     pip install -r requirements.txt
+   - Hoặc cài từng thư viện:
+     pip install selenium==4.16.0
+     pip install beautifulsoup4==4.12.2
+     pip install pywebview==4.4.1
+     pip install webdriver-manager==4.0.1
+
+3. Cấu Hình Chrome:
+   - Tạo profile Chrome mới cho scraper:
+     + Mở Chrome
+     + Vào chrome://version để xem đường dẫn User Data
+     + Tạo thư mục mới trong User Data (ví dụ: ScraperProfile)
+     + Đăng nhập Facebook vào profile này
+
+4. Cấu Hình Scraper:
+   - Mở file facebook_scrapper.py
+   - Tìm và cập nhật các đường dẫn:
+     user_data_dir = "đường_dẫn_đến_User_Data"
+     profile_directory = "tên_profile_chrome"
+
+Cách Sử Dụng:
+
+1. Chuẩn Bị Links:
+   - Tạo file links.txt trong thư mục gốc
+   - Thêm các link Facebook cần scrape, mỗi link một dòng
+   - Lưu file
+
+2. Chạy Scraper:
+   Cách 1 - Chạy Trực Tiếp:
+   - Mở Command Prompt
+   - Di chuyển đến thư mục chứa code
+   - Chạy lệnh: python facebook_scrapper.py
+
+   Cách 2 - Chạy Giao Diện:
+   - Chạy file app.py: python app.py
+   - Giao diện sẽ mở ra
+   - Dán link vào ô input
+   - Nhấn nút "Scrape"
+
+3. Kết Quả:
+   - Dữ liệu được lưu trong file facebook_data.txt
+   - Định dạng kết quả:
+     Bài viết của [Tên Người Dùng]
+         ([Số] lượt thích, [Số] lượt bình luận, [Số] lượt chia sẻ)
+
+Xử Lý Lỗi:
+
+1. Lỗi Chrome:
+   - Kiểm tra Chrome đã được cài đặt
+   - Đảm bảo đã đăng nhập Facebook trên profile Chrome được chọn
+   - Kiểm tra đường dẫn user_data_dir và profile_directory
+
+2. Lỗi Python:
+   - Kiểm tra Python đã được cài đặt đúng cách
+   - Kiểm tra các thư viện đã được cài đặt đầy đủ
+   - Xem log trong file scraper.log
+
+3. Lỗi Scraping:
+   - Kiểm tra kết nối internet
+   - Đảm bảo link Facebook hợp lệ
+   - Kiểm tra quyền truy cập bài viết
+
+Lưu Ý Quan Trọng:
+- Công cụ này chỉ dùng cho mục đích học tập và nghiên cứu
+- Tuân thủ điều khoản sử dụng của Facebook
+- Không scrape quá nhiều trong thời gian ngắn
+- Một số bài viết có thể không truy cập được do cài đặt riêng tư
+
+Hỗ Trợ:
+Email: [16.leminhnguyen@gmail.com] 

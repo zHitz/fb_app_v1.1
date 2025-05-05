@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Post Scraper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .dark .loading-spinner {
+            border-color: rgba(0,0,0,0.3);
+            border-top-color: #0ea5e9;
+        }
+        
+        .result-card {
+            transition: all 0.2s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .result-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm py-6">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                        <i class="fab fa-facebook text-blue-600 dark:text-blue-400 mr-2"></i>
+                        Facebook Post Scraper
+                    </h1>
+                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="max-w-4xl mx-auto">
+                <!-- Input Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Enter Facebook Post URLs</h2>
+                    <div class="space-y-4">
+                        <textarea 
+                            id="post-urls" 
+                            rows="4" 
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                            placeholder="Paste one or multiple Facebook post URLs (separated by new lines)"></textarea>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-info-circle mr-1"></i> Each URL should be on a new line
+                            </div>
+                            <button 
+                                id="scrape-btn" 
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <span>Scrape Posts</span>
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Results</h2>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            <span id="result-count">0</span> posts processed
+                        </div>
+                    </div>
+                    
+                    <div id="loading-indicator" class="hidden py-8 flex flex-col items-center justify-center">
+                        <div class="loading-spinner mb-4"></div>
+                        <p class="text-gray-600 dark:text-gray-300">Scraping posts, please wait...</p>
+                    </div>
+                    
+                    <div id="results-container" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                © 2023 Facebook Post Scraper. This tool is for educational purposes only.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or use system preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        // Scrape button functionality
+        const scrapeBtn = document.getElementById('scrape-btn');
+        const postUrls = document.getElementById('post-urls');
+        const resultsSection = document.getElementById('results-section');
+        const resultsContainer = document.getElementById('results-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const resultCount = document.getElementById('result-count');
+        
+        scrapeBtn.addEventListener('click', async () => {
+            const urls = postUrls.value.trim();
+            
+            if (!urls) {
+                showError('Please enter at least one Facebook post URL');
+                return;
+            }
+            
+            // Show loading and clear previous results
+            loadingIndicator.classList.remove('hidden');
+            resultsContainer.innerHTML = '';
+            resultsSection.classList.remove('hidden');
+            
+            // Split URLs by new lines and filter out empty ones
+            const urlList = urls.split('\n').filter(url => url.trim());
+            resultCount.textContent = urlList.length;
+            
+            try {
+                // Process each URL
+                const results = [];
+                for (const url of urlList) {
+                    try {
+                        const response = await window.pywebview.api.scrape(url);
+                        if (response.success) {
+                            results.push(response.data);
+                        } else {
+                            results.push({
+                                url,
+                                error: response.error
+                            });
+                        }
+                    } catch (error) {
+                        results.push({
+                            url,
+                            error: error.message || 'Unknown error occurred'
+                        });
+                    }
+                }
+                
+                // Display results
+                displayResults(results);
+            } catch (error) {
+                showError('An error occurred while scraping: ' + error.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+        
+        function displayResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const card = document.createElement('div');
+                card.className = `result-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 fade-in`;
+                
+                if (result.error_message || result.error) {
+                    card.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 dark:text-red-400">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">Error Processing Post</h3>
+                                <p class="text-red-600 dark:text-red-400 mt-1">${result.error_message || result.error}</p>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 break-all">URL: ${result.original_url || result.url}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="ml-4 flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">${result.user_name || 'Unknown User'}</h3>
+                                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-500 dark:text-green-400">
+                                        <i class="fas fa-check-circle text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2 grid grid-cols-3 gap-4">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-thumbs-up text-blue-500 dark:text-blue-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Likes</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${result.likes || '0'}</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-comment text-yellow-500 dark:text-yellow-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Comments</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${result.comments || '0'}</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-share text-purple-500 dark:text-purple-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Shares</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${result.shares || '0'}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 break-all">URL: ${result.original_url}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Scraped at: ${new Date(result.scrape_timestamp).toLocaleString()}</p>
+                                    <div class="mt-2 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            <i class="fas fa-thumbs-up text-blue-500 dark:text-blue-400 mr-1"></i>${result.likes || '0'} lượt thích, 
+                                            <i class="fas fa-comment text-yellow-500 dark:text-yellow-400 mr-1"></i>${result.comments || '0'} lượt bình luận, 
+                                            <i class="fas fa-share text-purple-500 dark:text-purple-400 mr-1"></i>${result.shares || '0'} lượt chia sẻ
+                                        </p>
+                                        <button 
+                                            onclick="copySummary(this, '${result.likes || '0'} lượt thích, ${result.comments || '0'} lượt bình luận, ${result.shares || '0'} lượt chia sẻ')"
+                                            class="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                            title="Copy summary">
+                                            <i class="fas fa-copy text-gray-500 dark:text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsContainer.appendChild(card);
+            });
+        }
+        
+        function showError(message) {
+            const errorCard = document.createElement('div');
+            errorCard.className = 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4';
+            errorCard.innerHTML = `
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700 dark:text-red-300">${message}</p>
+                    </div>
+                </div>
+            `;
+            resultsContainer.appendChild(errorCard);
+        }
+
+        function copySummary(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                button.classList.add('text-green-500');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                    button.classList.remove('text-green-500');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>

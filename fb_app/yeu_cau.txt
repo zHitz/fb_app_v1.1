@@ -1,0 +1,115 @@
+
+# 📋 Nếu mong muốn dùng **Webview** (app desktop frontend HTML + backend Python):
+
+## 📌 Ý tưởng:
+
+- Bạn dùng **`pywebview`**.
+- Frontend HTML/CSS/JS vẫn như cũ: có ô input, có nút, có kết quả trả về.
+- Backend (Python) sẽ xử lý scraping (`facebook_scrapper.py`) và giao tiếp trực tiếp với HTML frontend **không cần server Flask**.
+
+---
+
+# 🔥 Ưu điểm nếu dùng `pywebview`:
+- Không cần mở Flask server, không cần localhost, không cần port.
+- Tạo **ứng dụng desktop** (như một app Windows/Mac/Linux).
+- Frontend vẫn viết bằng HTML/CSS/JS bình thường.
+- Backend Python gọi được từ frontend JS **trực tiếp** thông qua API nội bộ của webview.
+
+---
+
+# 🛠️ Cách hoạt động:
+
+| Frontend HTML/JS | Backend Python |
+|:---|:---|
+| Gửi lệnh (gọi Python function) qua webview API | Nhận dữ liệu từ frontend, chạy `extract_data()`, trả kết quả lại frontend |
+| Ví dụ gọi `window.pywebview.api.scrape(url)` | Python nhận URL, scrape Facebook, trả kết quả |
+
+---
+
+# 📦 Cấu trúc code cơ bản:
+
+### 1. Python Backend (`main.py`)
+
+```python
+import webview
+from facebook_scrapper import setup_driver, extract_data
+
+class Api:
+    def scrape(self, url):
+        driver = setup_driver()
+        result = extract_data(driver, url)
+        driver.quit()
+        return result
+
+if __name__ == '__main__':
+    api = Api()
+    window = webview.create_window("Facebook Scraper", "frontend/index.html", js_api=api, width=800, height=600)
+    webview.start()
+```
+
+---
+
+### 2. HTML Frontend (`frontend/index.html`)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Facebook Scraper</title>
+</head>
+<body>
+    <h1>Facebook Post Scraper</h1>
+    <input type="text" id="urlInput" placeholder="Paste Facebook URL">
+    <button onclick="scrape()">Scrape</button>
+
+    <pre id="result"></pre>
+
+    <script>
+        async function scrape() {
+            const url = document.getElementById('urlInput').value;
+            const result = await window.pywebview.api.scrape(url);
+            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+        }
+    </script>
+</body>
+</html>
+```
+
+---
+
+# ✨ Kết quả:
+- User mở app Desktop -> nhập link Facebook -> click Scrape -> scrape dữ liệu real-time -> **hiện kết quả ngay** trong app **mà không cần web server**.
+- Ứng dụng nhìn như native app, nhẹ, đơn giản.
+  
+---
+
+# 🚀 Ưu điểm so với Flask:
+| Flask Server | pywebview |
+|:---|:---|
+| Cần server chạy (localhost hoặc VPS) | Không cần server, thành app desktop ngay |
+| Phải deploy nếu public cho người khác | Đóng gói thành `.exe` (PyInstaller) dễ dàng |
+| HTML load qua HTTP | HTML load từ file trực tiếp |
+
+---
+
+# 🎯 Tóm gọn:
+
+| Bạn muốn | Nên chọn |
+|:---|:---|
+| Làm Web App (cho nhiều người dùng truy cập) | Flask / FastAPI |
+| Làm App Desktop riêng, frontend HTML | **pywebview** |
+
+---
+
+✅ Nếu bạn dùng **pywebview**, thì:
+- `frontend/index.html` --> viết như web bình thường.
+- `main.py` --> làm cầu nối HTML <-> Python backend (facebook_scrapper).
+- **Không cần Flask, không cần web server.**
+
+---
+
+# 📢 Bạn cần lưu ý:
+- pywebview hiện hỗ trợ tốt Windows, MacOS, Linux.
+- Trên Windows phải có **edgehtml** hoặc **Chromium Embedded Framework (CEF)** để hiển thị web.
+
