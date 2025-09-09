@@ -1,0 +1,211 @@
+2025-09-09 11:15:25,502 - INFO - API initialized
+2025-09-09 11:16:32,350 - INFO - Starting scrape for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:16:45,587 - INFO - WebDriver initialized successfully
+2025-09-09 11:16:50,063 - INFO - Redirected to: https://www.facebook.com/kienkhongngu.vn/posts/pfbid0LPqXC1Vff2byq8o7soiNqZwAhSEDUMmJrAwy1Ym6yCYv18yxgNnh6kcTpihVYQdPl?rdid=P0e7691oWNKdUNVR
+2025-09-09 11:16:50,064 - INFO - Page load time: 4.48 seconds
+2025-09-09 11:16:50,118 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:16:50,119 - INFO - Content type detection time: 0.06 seconds
+2025-09-09 11:16:50,119 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:16:51,117 - INFO - Extracted username: Ki\u1ebfn Không Ng\u1ee7
+2025-09-09 11:16:51,137 - INFO - Extracted comments: 415
+2025-09-09 11:16:51,154 - INFO - Extracted shares: 871
+2025-09-09 11:16:51,171 - INFO - Extracted likes via XPath: 10K
+2025-09-09 11:16:51,171 - INFO - Post data extraction time: 1.05 seconds
+2025-09-09 11:16:51,171 - INFO - Total extraction time for URL https://www.facebook.com/share/p/19XMuXdiwH/: 5.58 seconds
+2025-09-09 11:16:51,171 - INFO - Successfully scraped data for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:18:28,538 - INFO - Starting scrape for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:18:32,377 - INFO - Redirected to: https://www.facebook.com/kienkhongngu.vn/posts/pfbid0LPqXC1Vff2byq8o7soiNqZwAhSEDUMmJrAwy1Ym6yCYv18yxgNnh6kcTpihVYQdPl?rdid=3GLOBxUJ6qHXQzs7
+2025-09-09 11:18:32,378 - INFO - Page load time: 3.83 seconds
+2025-09-09 11:18:32,447 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:18:32,447 - INFO - Content type detection time: 0.07 seconds
+2025-09-09 11:18:32,447 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:18:33,696 - INFO - Extracted username: Ki\u1ebfn Không Ng\u1ee7
+2025-09-09 11:18:33,723 - INFO - Extracted comments: 416
+2025-09-09 11:18:33,748 - INFO - Extracted shares: 871
+2025-09-09 11:18:33,821 - INFO - Extracted likes via XPath: 10K
+2025-09-09 11:18:33,821 - INFO - Post data extraction time: 1.37 seconds
+2025-09-09 11:18:33,822 - INFO - Total extraction time for URL https://www.facebook.com/share/p/19XMuXdiwH/: 5.28 seconds
+2025-09-09 11:18:33,822 - INFO - Successfully scraped data for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:18:46,901 - INFO - API initialized
+2025-09-09 11:18:56,909 - INFO - Starting scrape for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:19:00,177 - INFO - WebDriver initialized successfully
+2025-09-09 11:19:03,642 - INFO - Redirected to: https://www.facebook.com/kienkhongngu.vn/posts/pfbid0LPqXC1Vff2byq8o7soiNqZwAhSEDUMmJrAwy1Ym6yCYv18yxgNnh6kcTpihVYQdPl?rdid=quhPAC8BBzma5dz3
+2025-09-09 11:19:03,643 - INFO - Page load time: 3.47 seconds
+2025-09-09 11:19:03,669 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:19:03,669 - INFO - Content type detection time: 0.03 seconds
+2025-09-09 11:19:03,670 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:19:04,962 - INFO - Extracted username: Ki\u1ebfn Không Ng\u1ee7
+2025-09-09 11:19:04,979 - INFO - Extracted comments: 416
+2025-09-09 11:19:05,080 - INFO - Extracted shares: 871
+2025-09-09 11:19:05,097 - INFO - Extracted likes via XPath: 10K
+2025-09-09 11:19:05,097 - INFO - Post data extraction time: 1.43 seconds
+2025-09-09 11:19:05,097 - INFO - Total extraction time for URL https://www.facebook.com/share/p/19XMuXdiwH/: 4.92 seconds
+2025-09-09 11:19:05,097 - INFO - Successfully scraped data for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:19:33,404 - INFO - API initialized
+2025-09-09 11:19:39,530 - INFO - Starting scrape for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:19:42,418 - INFO - WebDriver initialized successfully
+2025-09-09 11:19:45,887 - INFO - Redirected to: https://www.facebook.com/kienkhongngu.vn/posts/pfbid0LPqXC1Vff2byq8o7soiNqZwAhSEDUMmJrAwy1Ym6yCYv18yxgNnh6kcTpihVYQdPl?rdid=XtJuOruwJog8xHZI
+2025-09-09 11:19:45,887 - INFO - Page load time: 3.47 seconds
+2025-09-09 11:19:45,905 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:19:45,905 - INFO - Content type detection time: 0.02 seconds
+2025-09-09 11:19:45,905 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:19:46,985 - INFO - Extracted username: Ki\u1ebfn Không Ng\u1ee7
+2025-09-09 11:19:47,002 - INFO - Extracted comments: 416
+2025-09-09 11:19:47,062 - INFO - Extracted shares: 873
+2025-09-09 11:19:47,088 - INFO - Extracted likes via XPath: 10K
+2025-09-09 11:19:47,088 - INFO - Post data extraction time: 1.18 seconds
+2025-09-09 11:19:47,088 - INFO - Total extraction time for URL https://www.facebook.com/share/p/19XMuXdiwH/: 4.67 seconds
+2025-09-09 11:19:47,088 - INFO - Successfully scraped data for URL: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:33:23,353 - INFO - API initialized
+2025-09-09 11:33:40,011 - INFO - Multi-thread API initialized
+2025-09-09 11:35:44,850 - INFO - Starting scraping task task_1757392544 with 3 URLs
+2025-09-09 11:35:44,851 - INFO - Initializing driver pool with 3 drivers
+2025-09-09 11:35:48,002 - INFO - WebDriver created successfully
+2025-09-09 11:35:48,002 - INFO - Driver 1/3 added to pool
+2025-09-09 11:35:51,664 - ERROR - Failed to create WebDriver: Message: session not created: Chrome failed to start: crashed.
+  (session not created: DevToolsActivePort file doesn't exist)
+  (The process started from chrome location C:\Program Files\Google\Chrome\Application\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6a8ed3d85+79397]
+	GetHandleVerifier [0x0x7ff6a8ed3de0+79488]
+	(No symbol) [0x0x7ff6a8c7c0fa]
+	(No symbol) [0x0x7ff6a8cbb62f]
+	(No symbol) [0x0x7ff6a8cb53f5]
+	(No symbol) [0x0x7ff6a8d08bde]
+	(No symbol) [0x0x7ff6a8d08370]
+	(No symbol) [0x0x7ff6a8cfaf73]
+	(No symbol) [0x0x7ff6a8cc41b1]
+	(No symbol) [0x0x7ff6a8cc4f43]
+	GetHandleVerifier [0x0x7ff6a919e1ed+3005069]
+	GetHandleVerifier [0x0x7ff6a919831d+2980797]
+	GetHandleVerifier [0x0x7ff6a91b7e0d+3110573]
+	GetHandleVerifier [0x0x7ff6a8eed6de+184190]
+	GetHandleVerifier [0x0x7ff6a8ef516f+215567]
+	GetHandleVerifier [0x0x7ff6a8edc974+115220]
+	GetHandleVerifier [0x0x7ff6a8edcb29+115657]
+	GetHandleVerifier [0x0x7ff6a8ec3268+11016]
+	BaseThreadInitThunk [0x0x7ffeb780e8d7+23]
+	RtlUserThreadStart [0x0x7ffeb7ce8d9c+44]
+
+2025-09-09 11:35:51,664 - ERROR - Failed to create driver 2: Message: session not created: Chrome failed to start: crashed.
+  (session not created: DevToolsActivePort file doesn't exist)
+  (The process started from chrome location C:\Program Files\Google\Chrome\Application\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6a8ed3d85+79397]
+	GetHandleVerifier [0x0x7ff6a8ed3de0+79488]
+	(No symbol) [0x0x7ff6a8c7c0fa]
+	(No symbol) [0x0x7ff6a8cbb62f]
+	(No symbol) [0x0x7ff6a8cb53f5]
+	(No symbol) [0x0x7ff6a8d08bde]
+	(No symbol) [0x0x7ff6a8d08370]
+	(No symbol) [0x0x7ff6a8cfaf73]
+	(No symbol) [0x0x7ff6a8cc41b1]
+	(No symbol) [0x0x7ff6a8cc4f43]
+	GetHandleVerifier [0x0x7ff6a919e1ed+3005069]
+	GetHandleVerifier [0x0x7ff6a919831d+2980797]
+	GetHandleVerifier [0x0x7ff6a91b7e0d+3110573]
+	GetHandleVerifier [0x0x7ff6a8eed6de+184190]
+	GetHandleVerifier [0x0x7ff6a8ef516f+215567]
+	GetHandleVerifier [0x0x7ff6a8edc974+115220]
+	GetHandleVerifier [0x0x7ff6a8edcb29+115657]
+	GetHandleVerifier [0x0x7ff6a8ec3268+11016]
+	BaseThreadInitThunk [0x0x7ffeb780e8d7+23]
+	RtlUserThreadStart [0x0x7ffeb7ce8d9c+44]
+
+2025-09-09 11:35:59,271 - ERROR - Failed to create WebDriver: Message: session not created: Chrome failed to start: crashed.
+  (session not created: DevToolsActivePort file doesn't exist)
+  (The process started from chrome location C:\Program Files\Google\Chrome\Application\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6a8ed3d85+79397]
+	GetHandleVerifier [0x0x7ff6a8ed3de0+79488]
+	(No symbol) [0x0x7ff6a8c7c0fa]
+	(No symbol) [0x0x7ff6a8cbb62f]
+	(No symbol) [0x0x7ff6a8cb53f5]
+	(No symbol) [0x0x7ff6a8d08bde]
+	(No symbol) [0x0x7ff6a8d08370]
+	(No symbol) [0x0x7ff6a8cfaf73]
+	(No symbol) [0x0x7ff6a8cc41b1]
+	(No symbol) [0x0x7ff6a8cc4f43]
+	GetHandleVerifier [0x0x7ff6a919e1ed+3005069]
+	GetHandleVerifier [0x0x7ff6a919831d+2980797]
+	GetHandleVerifier [0x0x7ff6a91b7e0d+3110573]
+	GetHandleVerifier [0x0x7ff6a8eed6de+184190]
+	GetHandleVerifier [0x0x7ff6a8ef516f+215567]
+	GetHandleVerifier [0x0x7ff6a8edc974+115220]
+	GetHandleVerifier [0x0x7ff6a8edcb29+115657]
+	GetHandleVerifier [0x0x7ff6a8ec3268+11016]
+	BaseThreadInitThunk [0x0x7ffeb780e8d7+23]
+	RtlUserThreadStart [0x0x7ffeb7ce8d9c+44]
+
+2025-09-09 11:35:59,271 - ERROR - Failed to create driver 3: Message: session not created: Chrome failed to start: crashed.
+  (session not created: DevToolsActivePort file doesn't exist)
+  (The process started from chrome location C:\Program Files\Google\Chrome\Application\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6a8ed3d85+79397]
+	GetHandleVerifier [0x0x7ff6a8ed3de0+79488]
+	(No symbol) [0x0x7ff6a8c7c0fa]
+	(No symbol) [0x0x7ff6a8cbb62f]
+	(No symbol) [0x0x7ff6a8cb53f5]
+	(No symbol) [0x0x7ff6a8d08bde]
+	(No symbol) [0x0x7ff6a8d08370]
+	(No symbol) [0x0x7ff6a8cfaf73]
+	(No symbol) [0x0x7ff6a8cc41b1]
+	(No symbol) [0x0x7ff6a8cc4f43]
+	GetHandleVerifier [0x0x7ff6a919e1ed+3005069]
+	GetHandleVerifier [0x0x7ff6a919831d+2980797]
+	GetHandleVerifier [0x0x7ff6a91b7e0d+3110573]
+	GetHandleVerifier [0x0x7ff6a8eed6de+184190]
+	GetHandleVerifier [0x0x7ff6a8ef516f+215567]
+	GetHandleVerifier [0x0x7ff6a8edc974+115220]
+	GetHandleVerifier [0x0x7ff6a8edcb29+115657]
+	GetHandleVerifier [0x0x7ff6a8ec3268+11016]
+	BaseThreadInitThunk [0x0x7ffeb780e8d7+23]
+	RtlUserThreadStart [0x0x7ffeb7ce8d9c+44]
+
+2025-09-09 11:36:03,313 - INFO - Driver pool initialized with 1 drivers
+2025-09-09 11:36:03,314 - INFO - Starting multi-threaded scraping of 3 URLs with 3 workers
+2025-09-09 11:36:07,364 - INFO - Processing task 0: https://www.facebook.com/share/p/19XMuXdiwH/
+2025-09-09 11:36:16,763 - INFO - Redirected to: https://www.facebook.com/kienkhongngu.vn/posts/pfbid0LPqXC1Vff2byq8o7soiNqZwAhSEDUMmJrAwy1Ym6yCYv18yxgNnh6kcTpihVYQdPl?rdid=FdQKqVUL5YfdVarO
+2025-09-09 11:36:16,763 - INFO - Page load time: 9.40 seconds
+2025-09-09 11:36:16,793 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:36:16,793 - INFO - Content type detection time: 0.03 seconds
+2025-09-09 11:36:16,793 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:36:18,046 - INFO - Extracted username: Ki\u1ebfn Không Ng\u1ee7
+2025-09-09 11:36:18,063 - INFO - Extracted comments: 421
+2025-09-09 11:36:18,088 - INFO - Extracted shares: 888
+2025-09-09 11:36:18,096 - INFO - Extracted likes via XPath: 10K
+2025-09-09 11:36:18,096 - INFO - Post data extraction time: 1.30 seconds
+2025-09-09 11:36:18,096 - INFO - Total extraction time for URL https://www.facebook.com/share/p/19XMuXdiwH/: 10.73 seconds
+2025-09-09 11:36:18,096 - INFO - Task 0 completed in 14.78s - Success: True
+2025-09-09 11:36:21,930 - INFO - Processing task 1: https://www.facebook.com/share/p/15JpPH5FWY/
+2025-09-09 11:36:25,267 - INFO - Redirected to: https://www.facebook.com/thongtinchinhphu/posts/pfbid0xfYvimKCzw3pZG3hDZGhUittmTUjxZdFJ5RJHkuk1Phca9L4JZkHiUDgTLCxjuPXl?rdid=LZGrLugyqeFhF4Bo
+2025-09-09 11:36:25,267 - INFO - Page load time: 3.34 seconds
+2025-09-09 11:36:25,275 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:36:25,275 - INFO - Content type detection time: 0.01 seconds
+2025-09-09 11:36:25,275 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:36:26,197 - INFO - Extracted username: Thông tin Chính ph\u1ee7
+2025-09-09 11:36:26,210 - INFO - Extracted comments: 66
+2025-09-09 11:36:26,225 - INFO - Extracted shares: 4K
+2025-09-09 11:36:26,239 - INFO - Extracted likes via XPath: 132K
+2025-09-09 11:36:26,239 - INFO - Post data extraction time: 0.96 seconds
+2025-09-09 11:36:26,239 - INFO - Total extraction time for URL https://www.facebook.com/share/p/15JpPH5FWY/: 4.31 seconds
+2025-09-09 11:36:26,239 - INFO - Task 1 completed in 22.92s - Success: True
+2025-09-09 11:36:29,519 - INFO - Processing task 2: https://www.facebook.com/share/p/1C4QqxeADr/
+2025-09-09 11:36:34,159 - INFO - Redirected to: https://www.facebook.com/Hanoinews.Official/posts/pfbid02TAEC8yMjrbEoVVMYv4NNfsk3LMAmknbCf6zfeLtp1jeHzDzufmMs2hK5bzSZxNoMl?rdid=ecXJAYetVQIG0pUV
+2025-09-09 11:36:34,159 - INFO - Page load time: 4.64 seconds
+2025-09-09 11:36:34,211 - INFO - Detected dialog popup — this is a post.
+2025-09-09 11:36:34,211 - INFO - Content type detection time: 0.05 seconds
+2025-09-09 11:36:34,211 - INFO - Not a video page, trying to extract data from post
+2025-09-09 11:36:35,219 - INFO - Extracted username: Hà N\u1ed9i News
+2025-09-09 11:36:35,234 - INFO - Extracted comments: 519
+2025-09-09 11:36:35,247 - INFO - Extracted shares: 18
+2025-09-09 11:36:35,259 - INFO - Extracted likes via XPath: 4,3K
+2025-09-09 11:36:35,259 - INFO - Post data extraction time: 1.05 seconds
+2025-09-09 11:36:35,259 - INFO - Total extraction time for URL https://www.facebook.com/share/p/1C4QqxeADr/: 5.74 seconds
+2025-09-09 11:36:35,259 - INFO - Task 2 completed in 31.94s - Success: True
+2025-09-09 11:36:35,262 - INFO - Scraping completed: {'total_tasks': 3, 'completed_tasks': 3, 'failed_tasks': 0, 'success_rate': 100.0, 'elapsed_time': 31.95, 'estimated_remaining': 0.0}
+2025-09-09 11:36:35,265 - INFO - Scraping task task_1757392544 completed with 3 results
+2025-09-09 13:07:40,821 - INFO - Data saved to facebook_data_multi_20250909_130740.txt
+2025-09-09 13:07:40,828 - INFO - Results saved to facebook_data_multi_20250909_130740.txt
+2025-09-09 13:44:51,444 - INFO - Shutting down multi-thread scraper
+2025-09-09 13:44:51,461 - INFO - Cleaning up driver pool

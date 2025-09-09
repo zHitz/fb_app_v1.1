@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Post Scraper - Multi-Thread</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .dark .loading-spinner {
+            border-color: rgba(0,0,0,0.3);
+            border-top-color: #0ea5e9;
+        }
+        
+        .result-card {
+            transition: all 0.2s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .result-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm py-6">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                            <i class="fab fa-facebook text-blue-600 dark:text-blue-400 mr-2"></i>
+                            Facebook Scraper
+                        </h1>
+                        <span class="ml-3 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium rounded-full">
+                            Multi-Thread
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button id="settings-btn" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="max-w-6xl mx-auto">
+                <!-- Input Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Enter Facebook Post URLs</h2>
+                    <div class="space-y-4">
+                        <textarea 
+                            id="post-urls" 
+                            rows="4" 
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                            placeholder="Paste one or multiple Facebook post URLs (separated by new lines)"></textarea>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-info-circle mr-1"></i> Each URL should be on a new line
+                            </div>
+                            <div class="flex gap-2">
+                                <button 
+                                    id="scrape-btn" 
+                                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <span>Start Scraping</span>
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button 
+                                    id="stop-btn" 
+                                    class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 hidden">
+                                    <span>Stop</span>
+                                    <i class="fas fa-stop"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="progress-section" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Progress</h2>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="pulse-dot w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300">Processing</span>
+                            </div>
+                            <span id="task-id" class="text-xs text-gray-500 dark:text-gray-400"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-2">
+                            <span id="progress-text">0 / 0 completed</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                            <div id="progress-bar" class="progress-bar bg-blue-600 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
+                            <div id="success-rate" class="text-lg font-semibold text-green-600 dark:text-green-400">0%</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Failed</div>
+                            <div id="failed-count" class="text-lg font-semibold text-red-600 dark:text-red-400">0</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Elapsed</div>
+                            <div id="elapsed-time" class="text-lg font-semibold text-gray-900 dark:text-gray-200">0s</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Remaining</div>
+                            <div id="remaining-time" class="text-lg font-semibold text-gray-900 dark:text-gray-200">0s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Results</h2>
+                        <div class="flex items-center gap-4">
+                            <span id="result-count" class="text-sm text-gray-500 dark:text-gray-400">0 posts processed</span>
+                            <div class="flex gap-2">
+                                <button id="save-txt-btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
+                                    <i class="fas fa-file-alt mr-1"></i> Save TXT
+                                </button>
+                                <button id="save-csv-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
+                                    <i class="fas fa-file-csv mr-1"></i> Save CSV
+                                </button>
+                                <button id="save-json-btn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors">
+                                    <i class="fas fa-file-code mr-1"></i> Save JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="results-container" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Scraping Settings</h3>
+                    <button id="close-settings" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Workers</label>
+                        <input type="range" id="max-workers" min="1" max="10" value="3" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>1</span>
+                            <span id="max-workers-value">3</span>
+                            <span>10</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rate Limit (seconds)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <input type="number" id="rate-limit-min" value="2" min="1" max="10" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Min</div>
+                            </div>
+                            <div>
+                                <input type="number" id="rate-limit-max" value="5" min="2" max="20" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Retries</label>
+                        <input type="number" id="max-retries" value="3" min="0" max="5" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button id="reset-settings" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Reset</button>
+                    <button id="save-settings" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                © 2023 Facebook Post Scraper - Multi-Thread Edition. This tool is for educational purposes only.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Global state
+        let currentTaskId = null;
+        let progressInterval = null;
+        let isScrapingActive = false;
+
+        // DOM elements
+        const elements = {
+            scrapeBtn: document.getElementById('scrape-btn'),
+            stopBtn: document.getElementById('stop-btn'),
+            postUrls: document.getElementById('post-urls'),
+            progressSection: document.getElementById('progress-section'),
+            resultsSection: document.getElementById('results-section'),
+            resultsContainer: document.getElementById('results-container'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            progressPercentage: document.getElementById('progress-percentage'),
+            successRate: document.getElementById('success-rate'),
+            failedCount: document.getElementById('failed-count'),
+            elapsedTime: document.getElementById('elapsed-time'),
+            remainingTime: document.getElementById('remaining-time'),
+            taskId: document.getElementById('task-id'),
+            resultCount: document.getElementById('result-count'),
+            themeToggle: document.getElementById('theme-toggle'),
+            settingsBtn: document.getElementById('settings-btn'),
+            settingsModal: document.getElementById('settings-modal'),
+            closeSettings: document.getElementById('close-settings'),
+            maxWorkers: document.getElementById('max-workers'),
+            maxWorkersValue: document.getElementById('max-workers-value'),
+            rateLimitMin: document.getElementById('rate-limit-min'),
+            rateLimitMax: document.getElementById('rate-limit-max'),
+            maxRetries: document.getElementById('max-retries'),
+            resetSettings: document.getElementById('reset-settings'),
+            saveSettings: document.getElementById('save-settings'),
+            saveTxtBtn: document.getElementById('save-txt-btn'),
+            saveCsvBtn: document.getElementById('save-csv-btn'),
+            saveJsonBtn: document.getElementById('save-json-btn')
+        };
+
+        // Dark mode toggle
+        const html = document.documentElement;
+        
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        
+        elements.themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Settings modal
+        elements.settingsBtn.addEventListener('click', () => {
+            elements.settingsModal.classList.remove('hidden');
+        });
+
+        elements.closeSettings.addEventListener('click', () => {
+            elements.settingsModal.classList.add('hidden');
+        });
+
+        elements.settingsModal.addEventListener('click', (e) => {
+            if (e.target === elements.settingsModal) {
+                elements.settingsModal.classList.add('hidden');
+            }
+        });
+
+        // Settings controls
+        elements.maxWorkers.addEventListener('input', () => {
+            elements.maxWorkersValue.textContent = elements.maxWorkers.value;
+        });
+
+        elements.resetSettings.addEventListener('click', () => {
+            elements.maxWorkers.value = 3;
+            elements.maxWorkersValue.textContent = 3;
+            elements.rateLimitMin.value = 2;
+            elements.rateLimitMax.value = 5;
+            elements.maxRetries.value = 3;
+        });
+
+        elements.saveSettings.addEventListener('click', () => {
+            elements.settingsModal.classList.add('hidden');
+            showNotification('Settings saved successfully', 'success');
+        });
+
+        // Main scraping functionality
+        elements.scrapeBtn.addEventListener('click', async () => {
+            const urls = elements.postUrls.value.trim();
+            
+            if (!urls) {
+                showNotification('Please enter at least one Facebook post URL', 'error');
+                return;
+            }
+            
+            const urlList = urls.split('\n').filter(url => url.trim());
+            
+            if (urlList.length === 0) {
+                showNotification('No valid URLs found', 'error');
+                return;
+            }
+
+            // Get settings
+            const config = {
+                max_workers: parseInt(elements.maxWorkers.value),
+                driver_pool_size: parseInt(elements.maxWorkers.value),
+                rate_limit_min: parseInt(elements.rateLimitMin.value),
+                rate_limit_max: parseInt(elements.rateLimitMax.value),
+                max_retries: parseInt(elements.maxRetries.value)
+            };
+
+            try {
+                // Start scraping
+                const response = await window.pywebview.api.start_scraping(urlList, config);
+                
+                if (response.success) {
+                    currentTaskId = response.task_id;
+                    isScrapingActive = true;
+                    
+                    // Update UI
+                    elements.scrapeBtn.classList.add('hidden');
+                    elements.stopBtn.classList.remove('hidden');
+                    elements.progressSection.classList.remove('hidden');
+                    elements.resultsSection.classList.add('hidden');
+                    elements.taskId.textContent = `Task: ${currentTaskId}`;
+                    
+                    // Clear previous results
+                    elements.resultsContainer.innerHTML = '';
+                    
+                    // Start progress monitoring
+                    startProgressMonitoring();
+                    
+                    showNotification(response.message, 'success');
+                } else {
+                    showNotification(response.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error starting scraping: ' + error.message, 'error');
+            }
+        });
+
+        elements.stopBtn.addEventListener('click', async () => {
+            try {
+                const response = await window.pywebview.api.stop_scraping();
+                
+                if (response.success) {
+                    isScrapingActive = false;
+                    stopProgressMonitoring();
+                    
+                    // Update UI
+                    elements.scrapeBtn.classList.remove('hidden');
+                    elements.stopBtn.classList.add('hidden');
+                    
+                    showNotification(response.message, 'info');
+                } else {
+                    showNotification(response.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error stopping scraping: ' + error.message, 'error');
+            }
+        });
+
+        // Save buttons
+        elements.saveTxtBtn.addEventListener('click', () => saveResults('txt'));
+        elements.saveCsvBtn.addEventListener('click', () => saveResults('csv'));
+        elements.saveJsonBtn.addEventListener('click', () => saveResults('json'));
+
+        async function saveResults(format) {
+            try {
+                const response = await window.pywebview.api.save_results(format);
+                
+                if (response.success) {
+                    showNotification(`${response.message} (${response.count} results)`, 'success');
+                } else {
+                    showNotification(response.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error saving results: ' + error.message, 'error');
+            }
+        }
+
+        function startProgressMonitoring() {
+            progressInterval = setInterval(async () => {
+                try {
+                    const progress = await window.pywebview.api.get_progress();
+                    updateProgressUI(progress);
+                    
+                    if (!progress.is_scraping && isScrapingActive) {
+                        // Scraping completed
+                        isScrapingActive = false;
+                        stopProgressMonitoring();
+                        
+                        // Update UI
+                        elements.scrapeBtn.classList.remove('hidden');
+                        elements.stopBtn.classList.add('hidden');
+                        
+                        // Load results
+                        await loadResults();
+                        
+                        showNotification('Scraping completed!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error monitoring progress:', error);
+                }
+            }, 1000);
+        }
+
+        function stopProgressMonitoring() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function updateProgressUI(progressData) {
+            const progress = progressData.progress;
+            const percentage = progress.total_tasks > 0 ? 
+                Math.round((progress.completed_tasks / progress.total_tasks) * 100) : 0;
+            
+            elements.progressBar.style.width = percentage + '%';
+            elements.progressText.textContent = `${progress.completed_tasks} / ${progress.total_tasks} completed`;
+            elements.progressPercentage.textContent = percentage + '%';
+            elements.successRate.textContent = progress.success_rate + '%';
+            elements.failedCount.textContent = progress.failed_tasks;
+            elements.elapsedTime.textContent = progress.elapsed_time + 's';
+            elements.remainingTime.textContent = progress.estimated_remaining + 's';
+        }
+
+        async function loadResults() {
+            try {
+                const response = await window.pywebview.api.get_results();
+                
+                if (response.success) {
+                    displayResults(response.results);
+                    elements.resultCount.textContent = `${response.total_count} posts processed`;
+                    elements.resultsSection.classList.remove('hidden');
+                } else {
+                    showNotification(response.error || 'Failed to load results', 'error');
+                }
+            } catch (error) {
+                showNotification('Error loading results: ' + error.message, 'error');
+            }
+        }
+
+        function displayResults(results) {
+            elements.resultsContainer.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const card = document.createElement('div');
+                card.className = `result-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 fade-in`;
+                
+                if (!result.success || result.error_message) {
+                    card.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 dark:text-red-400">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="ml-4 flex-grow">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">Error Processing Post</h3>
+                                <p class="text-red-600 dark:text-red-400 mt-1">${result.error_message || 'Unknown error'}</p>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 break-all">URL: ${result.url}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Processing time: ${result.processing_time?.toFixed(2) || 0}s</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const data = result.data;
+                    card.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="ml-4 flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">${data.user_name || 'Unknown User'}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-500 dark:text-green-400">
+                                            <i class="fas fa-check-circle text-sm"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">${result.processing_time?.toFixed(2) || 0}s</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 grid grid-cols-3 gap-4">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-thumbs-up text-blue-500 dark:text-blue-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Likes</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.likes || '0'}</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-comment text-yellow-500 dark:text-yellow-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Comments</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.comments || '0'}</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <i class="fas fa-share text-purple-500 dark:text-purple-400"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Shares</p>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.shares || '0'}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 break-all">URL: ${data.original_url}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Scraped at: ${new Date(data.scrape_timestamp).toLocaleString()}</p>
+                                    <div class="mt-2 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            <i class="fas fa-thumbs-up text-blue-500 dark:text-blue-400 mr-1"></i>${data.likes || '0'} lượt quan tâm, 
+                                            <i class="fas fa-comment text-yellow-500 dark:text-yellow-400 mr-1"></i>${data.comments || '0'} lượt bình luận, 
+                                            <i class="fas fa-share text-purple-500 dark:text-purple-400 mr-1"></i>${data.shares || '0'} lượt chia sẻ
+                                        </p>
+                                        <button 
+                                            onclick="copySummary(this, 'Bài viết của ${data.user_name || 'Unknown'}\\n        (${data.likes || '0'} lượt quan tâm, ${data.comments || '0'} lượt bình luận, ${data.shares || '0'} lượt chia sẻ)')"
+                                            class="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                            title="Copy summary">
+                                            <i class="fas fa-copy text-gray-500 dark:text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                elements.resultsContainer.appendChild(card);
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-100 border-green-500 text-green-700',
+                error: 'bg-red-100 border-red-500 text-red-700',
+                info: 'bg-blue-100 border-blue-500 text-blue-700'
+            };
+            
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg border-l-4 shadow-lg ${colors[type]} fade-in`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        function copySummary(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                button.classList.add('text-green-500');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                    button.classList.remove('text-green-500');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopProgressMonitoring();
+        });
+    </script>
+</body>
+</html> 

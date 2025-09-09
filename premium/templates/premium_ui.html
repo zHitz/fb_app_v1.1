@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Scraper Premium - Advanced Content & Media Extraction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                            800: '#075985', 900: '#0c4a6e',
+                        },
+                        premium: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .post-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+        }
+        
+        .post-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .post-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease-out;
+        }
+        
+        .content-preview {
+            position: relative;
+        }
+        
+        .content-text {
+            transition: max-height 0.3s ease-out, opacity 0.2s ease;
+        }
+        
+        .content-collapsed {
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .content-expanded {
+            max-height: none;
+            overflow: visible;
+        }
+        
+        .content-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(249,250,251,0.9));
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .dark .content-fade {
+            background: linear-gradient(transparent, rgba(55,65,81,0.9));
+        }
+        
+        .content-fade.hidden {
+            opacity: 0;
+        }
+        
+        .see-more-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .see-more-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .media-preview {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .media-fade-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                transparent 60%, 
+                rgba(0,0,0,0.3) 80%, 
+                rgba(0,0,0,0.7) 100%);
+            pointer-events: none;
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        
+        .media-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .media-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .media-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .media-count-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .premium-badge {
+            background: linear-gradient(135deg, #d946ef 0%, #c026d3 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stats-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .dark .stats-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-backdrop {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+        }
+        
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .btn-loading:hover {
+            transform: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 min-h-screen transition-all duration-300">
+    
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-white/20 dark:border-gray-700/50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="fab fa-facebook text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Facebook Scraper</h1>
+                            <span class="premium-badge">Premium</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="settings-btn" class="p-2.5 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-600/70 transition-all">
+                        <i class="fas fa-cog text-lg"></i>
+                    </button>
+                    <button id="theme-toggle" class="p-2.5 rounded-xl bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-600/70 transition-all">
+                        <i class="fas fa-moon dark:hidden text-lg"></i>
+                        <i class="fas fa-sun hidden dark:block text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 max-w-7xl">
+        
+        <!-- Input Section -->
+        <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl p-8 mb-8 border border-white/20 dark:border-gray-700/30">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6 flex items-center">
+                <i class="fas fa-link text-blue-500 mr-3"></i>
+                Nhập URL Facebook Posts
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="relative">
+                    <textarea 
+                        id="post-urls" 
+                        rows="5" 
+                        class="w-full px-6 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none" 
+                        placeholder="Dán các URL Facebook posts vào đây (mỗi URL một dòng)&#10;&#10;Ví dụ:&#10;https://facebook.com/post1&#10;https://facebook.com/post2"></textarea>
+                    <div class="absolute bottom-4 right-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span id="url-count">0</span> URLs
+                    </div>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Mỗi URL trên một dòng riêng</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-download text-green-500"></i>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Tự động tải content + media</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button 
+                            id="scrape-btn" 
+                            class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105">
+                            <i class="fas fa-rocket"></i>
+                            <span>Bắt Đầu Scraping</span>
+                        </button>
+                        <button 
+                            id="stop-btn" 
+                            class="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105 hidden">
+                            <i class="fas fa-stop"></i>
+                            <span>Dừng Lại</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="progress-section" class="hidden bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl p-8 mb-8 border border-white/20 dark:border-gray-700/30">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <i class="fas fa-chart-line text-green-500 mr-3"></i>
+                    Tiến Độ Xử Lý
+                </h2>
+                <div class="flex items-center space-x-3">
+                    <div class="pulse-dot w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Đang xử lý...</span>
+                    <span id="task-id" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg"></span>
+                </div>
+            </div>
+            
+            <!-- Main Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
+                    <span id="progress-text">0 / 0 posts hoàn thành</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                    <div id="progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full flex items-center justify-center" style="width: 0%">
+                        <div class="w-full h-1 bg-white/30 rounded-full mx-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Thành Công</div>
+                    <div id="success-rate" class="text-2xl font-bold text-green-500">0%</div>
+                </div>
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Thất Bại</div>
+                    <div id="failed-count" class="text-2xl font-bold text-red-500">0</div>
+                </div>
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Thời Gian</div>
+                    <div id="elapsed-time" class="text-2xl font-bold text-blue-500">0s</div>
+                </div>
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Còn Lại</div>
+                    <div id="remaining-time" class="text-2xl font-bold text-purple-500">0s</div>
+                </div>
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Media Tìm Thấy</div>
+                    <div id="media-found" class="text-2xl font-bold text-orange-500">0</div>
+                </div>
+                <div class="stats-card rounded-xl p-4">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Đã Tải</div>
+                    <div id="media-downloaded" class="text-2xl font-bold text-cyan-500">0</div>
+                </div>
+            </div>
+
+            <!-- Current Activity -->
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="loading-spinner"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300" id="current-activity">Đang khởi tạo...</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400" id="current-url"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <i class="fas fa-trophy text-yellow-500 mr-3"></i>
+                    Kết Quả Scraping
+                </h2>
+                <div class="flex items-center space-x-4">
+                    <span id="result-count" class="text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg">0 posts đã xử lý</span>
+                    <div class="flex space-x-2">
+                        <button id="save-txt-btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fas fa-file-alt"></i>
+                            <span>TXT</span>
+                        </button>
+                        <button id="save-csv-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fas fa-table"></i>
+                            <span>CSV</span>
+                        </button>
+                        <button id="save-json-btn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fas fa-code"></i>
+                            <span>JSON</span>
+                        </button>
+                        <button id="open-folder-btn" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Mở Thư Mục</span>
+                        </button>
+                        <button id="copy-results-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy All</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="results-container" class="space-y-6"></div>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <i class="fas fa-cog text-purple-500 mr-3"></i>
+                    Cài Đặt Premium
+                </h3>
+                <button id="close-settings" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-8">
+                <!-- Threading Settings -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+                        <i class="fas fa-microchip text-blue-500 mr-2"></i>
+                        Cài Đặt Threading
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Số Workers Tối Đa</label>
+                            <input type="range" id="max-workers" min="1" max="3" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+                            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <span>1</span>
+                                <span id="max-workers-value" class="font-medium">2</span>
+                                <span>3</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rate Limit (giây)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="rate-limit-min" value="2" min="1" max="10" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm">
+                                <input type="number" id="rate-limit-max" value="5" min="2" max="20" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <span>Min</span>
+                                <span>Max</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Extraction -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+                        <i class="fas fa-align-left text-green-500 mr-2"></i>
+                        Trích Xuất Nội Dung
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="extract-content" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Trích xuất text content</span>
+                            </label>
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="extract-hashtags" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Trích xuất hashtags</span>
+                            </label>
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="extract-mentions" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Trích xuất mentions</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Số từ preview</label>
+                            <input type="number" id="preview-words" value="50" min="10" max="200" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Download -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+                        <i class="fas fa-download text-purple-500 mr-2"></i>
+                        Tải Media
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="download-media" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Tự động tải media</span>
+                            </label>
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="create-thumbnails" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Tạo thumbnails</span>
+                            </label>
+                            <label class="flex items-center space-x-3">
+                                <input type="checkbox" id="organize-by-date" checked class="w-4 h-4 text-blue-600 rounded">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Sắp xếp theo ngày</span>
+                            </label>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chất lượng media</label>
+                                <select id="media-quality" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                    <option value="low">Thấp (Nhanh)</option>
+                                    <option value="medium">Trung bình</option>
+                                    <option value="high" selected>Cao (Chậm)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kích thước tối đa (MB)</label>
+                                <input type="range" id="max-file-size" min="1" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+                                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <span>1MB</span>
+                                    <span id="max-file-size-value" class="font-medium">50MB</span>
+                                    <span>100MB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <button id="reset-settings" class="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors">
+                    Đặt Lại
+                </button>
+                <button id="save-settings" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all">
+                    Lưu Cài Đặt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content/Media Modal -->
+    <div id="content-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-600">
+                <h3 id="modal-title" class="text-xl font-bold text-gray-800 dark:text-gray-200"></h3>
+                <button id="close-content-modal" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Premium Facebook Scraper JavaScript - Embedded directly to avoid path issues
+        console.log('Loading Premium Scraper...');
+        
+        class PremiumScraper {
+            constructor() {
+                this.currentTaskId = null;
+                this.progressInterval = null;
+                this.isScrapingActive = false;
+                this.results = [];
+                
+                console.log('Initializing PremiumScraper...');
+                this.initializeElements();
+                this.setupEventListeners();
+                this.loadSettings();
+                this.initializeTheme();
+                console.log('PremiumScraper initialized successfully');
+            }
+
+            initializeElements() {
+                console.log('Initializing elements...');
+                this.elements = {
+                    postUrls: document.getElementById('post-urls'),
+                    urlCount: document.getElementById('url-count'),
+                    scrapeBtn: document.getElementById('scrape-btn'),
+                    stopBtn: document.getElementById('stop-btn'),
+                    progressSection: document.getElementById('progress-section'),
+                    progressBar: document.getElementById('progress-bar'),
+                    progressText: document.getElementById('progress-text'),
+                    progressPercentage: document.getElementById('progress-percentage'),
+                    successRate: document.getElementById('success-rate'),
+                    failedCount: document.getElementById('failed-count'),
+                    elapsedTime: document.getElementById('elapsed-time'),
+                    remainingTime: document.getElementById('remaining-time'),
+                    mediaFound: document.getElementById('media-found'),
+                    mediaDownloaded: document.getElementById('media-downloaded'),
+                    currentActivity: document.getElementById('current-activity'),
+                    currentUrl: document.getElementById('current-url'),
+                    taskId: document.getElementById('task-id'),
+                    resultsSection: document.getElementById('results-section'),
+                    resultsContainer: document.getElementById('results-container'),
+                    resultCount: document.getElementById('result-count'),
+                    saveTxtBtn: document.getElementById('save-txt-btn'),
+                    saveCsvBtn: document.getElementById('save-csv-btn'),
+                    saveJsonBtn: document.getElementById('save-json-btn'),
+                    openFolderBtn: document.getElementById('open-folder-btn'),
+                    copyResultsBtn: document.getElementById('copy-results-btn'),
+                    themeToggle: document.getElementById('theme-toggle'),
+                    settingsBtn: document.getElementById('settings-btn'),
+                    settingsModal: document.getElementById('settings-modal'),
+                    closeSettings: document.getElementById('close-settings'),
+                    maxWorkers: document.getElementById('max-workers'),
+                    maxWorkersValue: document.getElementById('max-workers-value'),
+                    rateLimitMin: document.getElementById('rate-limit-min'),
+                    rateLimitMax: document.getElementById('rate-limit-max'),
+                    extractContent: document.getElementById('extract-content'),
+                    extractHashtags: document.getElementById('extract-hashtags'),
+                    extractMentions: document.getElementById('extract-mentions'),
+                    previewWords: document.getElementById('preview-words'),
+                    downloadMedia: document.getElementById('download-media'),
+                    createThumbnails: document.getElementById('create-thumbnails'),
+                    organizeByDate: document.getElementById('organize-by-date'),
+                    mediaQuality: document.getElementById('media-quality'),
+                    maxFileSize: document.getElementById('max-file-size'),
+                    maxFileSizeValue: document.getElementById('max-file-size-value'),
+                    resetSettings: document.getElementById('reset-settings'),
+                    saveSettings: document.getElementById('save-settings'),
+                    contentModal: document.getElementById('content-modal'),
+                    closeContentModal: document.getElementById('close-content-modal'),
+                    modalTitle: document.getElementById('modal-title'),
+                    modalContent: document.getElementById('modal-content')
+                };
+                console.log('Elements initialized');
+            }
+
+            setupEventListeners() {
+                console.log('Setting up event listeners...');
+                
+                // URL input
+                this.elements.postUrls.addEventListener('input', () => this.updateUrlCount());
+                
+                // Main controls with enhanced feedback
+                this.elements.scrapeBtn.addEventListener('click', (e) => {
+                    console.log('Scrape button clicked');
+                    this.startScraping();
+                });
+                
+                this.elements.stopBtn.addEventListener('click', (e) => {
+                    console.log('Stop button clicked');
+                    this.stopScraping();
+                });
+                
+                // Save buttons
+                this.elements.saveTxtBtn.addEventListener('click', () => this.saveResults('txt'));
+                this.elements.saveCsvBtn.addEventListener('click', () => this.saveResults('csv'));
+                this.elements.saveJsonBtn.addEventListener('click', () => this.saveResults('json'));
+                this.elements.openFolderBtn.addEventListener('click', () => this.openDownloadFolder());
+                this.elements.copyResultsBtn.addEventListener('click', () => this.copyAllResults());
+                
+                // Theme toggle
+                this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
+                
+                // Settings modal
+                this.elements.settingsBtn.addEventListener('click', (e) => {
+                    console.log('Settings button clicked');
+                    this.openSettings();
+                });
+                this.elements.closeSettings.addEventListener('click', () => this.closeSettings());
+                this.elements.settingsModal.addEventListener('click', (e) => {
+                    if (e.target === this.elements.settingsModal) this.closeSettings();
+                });
+                
+                // Settings controls
+                this.elements.maxWorkers.addEventListener('input', () => {
+                    this.elements.maxWorkersValue.textContent = this.elements.maxWorkers.value;
+                });
+                
+                this.elements.maxFileSize.addEventListener('input', () => {
+                    this.elements.maxFileSizeValue.textContent = this.elements.maxFileSize.value + 'MB';
+                });
+                
+                this.elements.resetSettings.addEventListener('click', () => this.resetSettings());
+                this.elements.saveSettings.addEventListener('click', () => this.saveSettingsToStorage());
+                
+                // Content modal
+                if (this.elements.closeContentModal) {
+                    this.elements.closeContentModal.addEventListener('click', () => this.closeContentModal());
+                }
+                if (this.elements.contentModal) {
+                    this.elements.contentModal.addEventListener('click', (e) => {
+                        if (e.target === this.elements.contentModal) this.closeContentModal();
+                    });
+                }
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeSettings();
+                        this.closeContentModal();
+                    }
+                });
+                
+                console.log('Event listeners setup complete');
+            }
+
+            updateUrlCount() {
+                const urls = this.elements.postUrls.value.trim();
+                const urlList = urls ? urls.split('\n').filter(url => url.trim()) : [];
+                this.elements.urlCount.textContent = urlList.length;
+            }
+
+            async startScraping() {
+                console.log('Starting scraping process...');
+                
+                // Immediate UI feedback - disable button and show loading
+                this.elements.scrapeBtn.disabled = true;
+                this.elements.scrapeBtn.classList.add('btn-loading');
+                this.elements.scrapeBtn.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <span>Đang khởi tạo...</span>
+                `;
+                
+                const urls = this.elements.postUrls.value.trim();
+                
+                if (!urls) {
+                    this.showNotification('Vui lòng nhập ít nhất một URL Facebook', 'error');
+                    this.resetScrapeButton();
+                    return;
+                }
+                
+                const urlList = urls.split('\n').filter(url => url.trim());
+                
+                if (urlList.length === 0) {
+                    this.showNotification('Không tìm thấy URL hợp lệ', 'error');
+                    this.resetScrapeButton();
+                    return;
+                }
+
+                // Get settings
+                const config = this.getScrapingConfig();
+                console.log('Using config:', config);
+
+                try {
+                    // Update button to show connecting state
+                    this.elements.scrapeBtn.innerHTML = `
+                        <div class="loading-spinner"></div>
+                        <span>Đang kết nối...</span>
+                    `;
+                    
+                    // Start scraping via API
+                    const response = await window.pywebview.api.start_premium_scraping(urlList, config);
+                    console.log('API response:', response);
+                    
+                    if (response.success) {
+                        this.currentTaskId = response.task_id;
+                        this.isScrapingActive = true;
+                        
+                        // Update UI to active scraping state
+                        this.elements.scrapeBtn.classList.add('hidden');
+                        this.elements.stopBtn.classList.remove('hidden');
+                        this.elements.progressSection.classList.remove('hidden');
+                        this.elements.resultsSection.classList.add('hidden');
+                        this.elements.taskId.textContent = `Task: ${this.currentTaskId}`;
+                        
+                        // Clear previous results
+                        this.elements.resultsContainer.innerHTML = '';
+                        this.results = [];
+                        
+                        // Start progress monitoring
+                        this.startProgressMonitoring();
+                        
+                        this.showNotification(`Bắt đầu scraping ${urlList.length} posts với ${config.max_workers} workers`, 'success');
+                    } else {
+                        this.showNotification(response.error, 'error');
+                        this.resetScrapeButton();
+                    }
+                } catch (error) {
+                    console.error('Scraping error:', error);
+                    this.showNotification('Lỗi khi bắt đầu scraping: ' + error.message, 'error');
+                    this.resetScrapeButton();
+                }
+            }
+            
+            resetScrapeButton() {
+                this.elements.scrapeBtn.disabled = false;
+                this.elements.scrapeBtn.classList.remove('btn-loading');
+                this.elements.scrapeBtn.innerHTML = `
+                    <i class="fas fa-rocket"></i>
+                    <span>Bắt Đầu Scraping</span>
+                `;
+            }
+
+            async stopScraping() {
+                console.log('Stopping scraping...');
+                
+                // Immediate UI feedback
+                this.elements.stopBtn.disabled = true;
+                this.elements.stopBtn.classList.add('btn-loading');
+                this.elements.stopBtn.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <span>Đang dừng...</span>
+                `;
+                
+                try {
+                    const response = await window.pywebview.api.stop_premium_scraping();
+                    
+                    if (response.success) {
+                        this.isScrapingActive = false;
+                        this.stopProgressMonitoring();
+                        
+                        // Update UI
+                        this.elements.scrapeBtn.classList.remove('hidden');
+                        this.elements.stopBtn.classList.add('hidden');
+                        this.resetScrapeButton();
+                        this.resetStopButton();
+                        
+                        this.showNotification(response.message, 'info');
+                    } else {
+                        this.showNotification(response.error, 'error');
+                        this.resetStopButton();
+                    }
+                } catch (error) {
+                    this.showNotification('Lỗi khi dừng scraping: ' + error.message, 'error');
+                    this.resetStopButton();
+                }
+            }
+            
+            resetStopButton() {
+                this.elements.stopBtn.disabled = false;
+                this.elements.stopBtn.classList.remove('btn-loading');
+                this.elements.stopBtn.innerHTML = `
+                    <i class="fas fa-stop"></i>
+                    <span>Dừng Lại</span>
+                `;
+            }
+
+            startProgressMonitoring() {
+                console.log('Starting progress monitoring...');
+                this.progressInterval = setInterval(async () => {
+                    try {
+                        const progress = await window.pywebview.api.get_premium_progress();
+                        this.updateProgressUI(progress);
+                        
+                        if (!progress.is_scraping && this.isScrapingActive) {
+                            // Scraping completed
+                            console.log('Scraping completed');
+                            this.isScrapingActive = false;
+                            this.stopProgressMonitoring();
+                            
+                            // Update UI
+                            this.elements.scrapeBtn.classList.remove('hidden');
+                            this.elements.stopBtn.classList.add('hidden');
+                            this.resetScrapeButton();
+                            
+                            // Load results
+                            await this.loadResults();
+                            
+                            this.showNotification('Scraping hoàn thành!', 'success');
+                        }
+                    } catch (error) {
+                        console.error('Error monitoring progress:', error);
+                    }
+                }, 1000);
+            }
+
+            stopProgressMonitoring() {
+                if (this.progressInterval) {
+                    clearInterval(this.progressInterval);
+                    this.progressInterval = null;
+                    console.log('Progress monitoring stopped');
+                }
+            }
+
+            updateProgressUI(progressData) {
+                const progress = progressData.progress;
+                const percentage = progress.total_tasks > 0 ? 
+                    Math.round((progress.completed_tasks / progress.total_tasks) * 100) : 0;
+                
+                // Main progress
+                this.elements.progressBar.style.width = percentage + '%';
+                this.elements.progressText.textContent = `${progress.completed_tasks} / ${progress.total_tasks} posts hoàn thành`;
+                this.elements.progressPercentage.textContent = percentage + '%';
+                
+                // Detailed stats
+                this.elements.successRate.textContent = progress.success_rate.toFixed(1) + '%';
+                this.elements.failedCount.textContent = progress.failed_tasks;
+                this.elements.elapsedTime.textContent = progress.elapsed_time.toFixed(1) + 's';
+                this.elements.remainingTime.textContent = progress.estimated_remaining.toFixed(1) + 's';
+                this.elements.mediaFound.textContent = progress.media_found || 0;
+                this.elements.mediaDownloaded.textContent = progress.media_downloaded || 0;
+                
+                // Current activity
+                this.elements.currentActivity.textContent = progress.current_activity || 'Đang xử lý...';
+                this.elements.currentUrl.textContent = progress.current_url ? 
+                    progress.current_url.substring(0, 60) + '...' : '';
+            }
+
+            async loadResults() {
+                console.log('Loading results...');
+                try {
+                    const response = await window.pywebview.api.get_premium_results();
+                    
+                    if (response.success) {
+                        this.results = response.results;
+                        this.displayResults(this.results);
+                        this.elements.resultCount.textContent = `${response.total_count} posts đã xử lý`;
+                        this.elements.resultsSection.classList.remove('hidden');
+                        console.log('Results loaded successfully');
+                    } else {
+                        this.showNotification(response.error || 'Không thể tải kết quả', 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Lỗi khi tải kết quả: ' + error.message, 'error');
+                }
+            }
+
+            displayResults(results) {
+                this.elements.resultsContainer.innerHTML = '';
+                
+                results.forEach((result, index) => {
+                    const card = this.createPostCard(result, index);
+                    this.elements.resultsContainer.appendChild(card);
+                });
+            }
+
+            createPostCard(result, index) {
+                const card = document.createElement('div');
+                card.className = 'post-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/30 fade-in';
+                
+                if (!result.success || result.error_message) {
+                    card.innerHTML = this.createErrorCard(result);
+                } else {
+                    card.innerHTML = this.createSuccessCard(result);
+                }
+                
+                return card;
+            }
+
+            createErrorCard(result) {
+                return `
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 text-lg"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-2">Lỗi Xử Lý Post</h3>
+                            <p class="text-red-600 dark:text-red-400 mb-3">${result.error_message || 'Lỗi không xác định'}</p>
+                            <div class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                                <p><strong>URL:</strong> <span class="break-all">${result.url}</span></p>
+                                <p><strong>Thời gian xử lý:</strong> ${(result.processing_time || 0).toFixed(2)}s</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            createSuccessCard(result) {
+                const data = result.post_data;
+                const hasContent = data.content && data.content.full_text;
+                const hasMedia = data.media_items && data.media_items.length > 0;
+                
+                return `
+                    <div class="space-y-6">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.user_name || 'Người dùng không xác định'}</h3>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg">
+                                            ${this.getPostTypeIcon(data.post_type)} ${this.getPostTypeName(data.post_type)}
+                                        </span>
+                                        <span>•</span>
+                                        <span>${(result.processing_time || 0).toFixed(2)}s</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+
+                        <!-- Content Preview -->
+                        ${hasContent ? this.createContentPreview(data.content) : ''}
+
+                        <!-- Media Preview -->
+                        ${hasMedia ? this.createMediaPreview(data.media_items, result.task_id) : ''}
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                                <div class="flex items-center justify-center space-x-1 mb-1">
+                                    <i class="fas fa-thumbs-up text-blue-500"></i>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Likes</span>
+                                </div>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.stats?.likes || '0'}</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                                <div class="flex items-center justify-center space-x-1 mb-1">
+                                    <i class="fas fa-comment text-yellow-500"></i>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Comments</span>
+                                </div>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.stats?.comments || '0'}</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                                <div class="flex items-center justify-center space-x-1 mb-1">
+                                    <i class="fas fa-share text-purple-500"></i>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Shares</span>
+                                </div>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-gray-200">${data.stats?.shares || '0'}</p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <span class="break-all">${data.original_url}</span>
+                            </div>
+                            ${hasMedia ? `
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    ${result.media_downloaded || 0}/${data.media_count || 0} media tải thành công
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            createContentPreview(content) {
+                if (!content || !content.full_text) return '';
+                
+                const showPreview = content.has_more;
+                const contentId = 'content-' + Math.random().toString(36).substr(2, 9);
+                
+                return `
+                    <div class="content-preview bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4">
+                        <div class="prose dark:prose-invert max-w-none">
+                            <div id="${contentId}" class="content-text ${showPreview ? 'content-collapsed' : ''}">
+                                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">${this.escapeHtml(content.full_text)}</p>
+                            </div>
+                            ${showPreview ? `
+                                <div class="content-fade ${contentId}-fade"></div>
+                            ` : ''}
+                        </div>
+                        ${showPreview ? `
+                            <button onclick="premiumScraper.toggleContent('${contentId}')" class="mt-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm transition-colors see-more-btn">
+                                <i class="fas fa-chevron-down mr-1"></i>Xem thêm (${content.word_count} từ)
+                            </button>
+                        ` : ''}
+                        ${content.hashtags && content.hashtags.length > 0 ? `
+                            <div class="mt-3 flex flex-wrap gap-1">
+                                ${content.hashtags.map(tag => `<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-lg">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            createMediaPreview(mediaItems, taskId) {
+                if (!mediaItems || mediaItems.length === 0) return '';
+                
+                const images = mediaItems.filter(item => item.type === 'image');
+                const videos = mediaItems.filter(item => item.type === 'video');
+                const showCount = Math.min(4, images.length);
+                const remainingCount = Math.max(0, images.length - showCount);
+                
+                return `
+                    <div class="media-preview-container">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                <i class="fas fa-images text-purple-500 mr-2"></i>
+                                Media (${images.length} ảnh, ${videos.length} video)
+                            </h4>
+                        </div>
+                        
+                        <div class="media-grid">
+                            ${images.slice(0, showCount).map((item, index) => `
+                                <div class="media-item">
+                                    <img src="${item.url}" alt="Media ${index + 1}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1pbWFnZSI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgcnk9IjIiLz48Y2lyY2xlIGN4PSI4LjUiIGN5PSI4LjUiIHI9IjEuNSIvPjxwYXRoIGQ9Im0yMSAxNS00LTQtNSA1Ii8+PC9zdmc+'">
+                                    <div class="media-fade-overlay"></div>
+                                    ${index === showCount - 1 && remainingCount > 0 ? `
+                                        <div class="media-count-badge">+${remainingCount}</div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        ${videos.length > 0 ? `
+                            <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-video text-red-500 mr-2"></i>
+                                    <span>${videos.length} video(s) được tìm thấy</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Content expand/collapse functions (Facebook-style)
+            toggleContent(contentId) {
+                const contentEl = document.getElementById(contentId);
+                const fadeEl = document.querySelector(`.${contentId}-fade`);
+                const button = event.target.closest('button');
+                
+                if (!contentEl || !button) return;
+                
+                const isCollapsed = contentEl.classList.contains('content-collapsed');
+                
+                if (isCollapsed) {
+                    // Expand content
+                    contentEl.classList.remove('content-collapsed');
+                    contentEl.classList.add('content-expanded');
+                    
+                    // Hide fade effect
+                    if (fadeEl) {
+                        fadeEl.classList.add('hidden');
+                    }
+                    
+                    // Update button
+                    button.innerHTML = `
+                        <i class="fas fa-chevron-up mr-1"></i>Ẩn bớt
+                    `;
+                } else {
+                    // Collapse content
+                    contentEl.classList.remove('content-expanded');
+                    contentEl.classList.add('content-collapsed');
+                    
+                    // Show fade effect
+                    if (fadeEl) {
+                        fadeEl.classList.remove('hidden');
+                    }
+                    
+                    // Update button
+                    const wordCount = button.textContent.match(/\((\d+) từ\)/);
+                    const wordText = wordCount ? wordCount[0] : '';
+                    button.innerHTML = `
+                        <i class="fas fa-chevron-down mr-1"></i>Xem thêm ${wordText}
+                    `;
+                }
+            }
+
+            // Modal functions (kept for backward compatibility)
+            showFullContent(fullText, wordCount) {
+                this.elements.modalTitle.textContent = `Nội dung đầy đủ (${wordCount})`;
+                this.elements.modalContent.innerHTML = `
+                    <div class="prose dark:prose-invert max-w-none">
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">${fullText}</p>
+                    </div>
+                `;
+                this.elements.contentModal.classList.remove('hidden');
+            }
+
+            closeContentModal() {
+                if (this.elements.contentModal) {
+                    this.elements.contentModal.classList.add('hidden');
+                }
+            }
+
+            // Utility functions
+            getPostTypeIcon(postType) {
+                const icons = {
+                    'text': '📝',
+                    'image': '🖼️',
+                    'video': '🎥',
+                    'mixed': '🎭',
+                    'link': '🔗',
+                    'unknown': '❓'
+                };
+                return icons[postType] || '❓';
+            }
+
+            getPostTypeName(postType) {
+                const names = {
+                    'text': 'Text Post',
+                    'image': 'Image Post',
+                    'video': 'Video Post',
+                    'mixed': 'Mixed Media',
+                    'link': 'Link Post',
+                    'unknown': 'Unknown'
+                };
+                return names[postType] || 'Unknown';
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Settings functions
+            getScrapingConfig() {
+                return {
+                    max_workers: parseInt(this.elements.maxWorkers.value),
+                    driver_pool_size: parseInt(this.elements.maxWorkers.value),
+                    rate_limit_min: parseFloat(this.elements.rateLimitMin.value),
+                    rate_limit_max: parseFloat(this.elements.rateLimitMax.value),
+                    extract_content: this.elements.extractContent.checked,
+                    extract_hashtags: this.elements.extractHashtags.checked,
+                    extract_mentions: this.elements.extractMentions.checked,
+                    content_preview_words: parseInt(this.elements.previewWords.value),
+                    download_media: this.elements.downloadMedia.checked,
+                    create_thumbnails: this.elements.createThumbnails.checked,
+                    organize_by_date: this.elements.organizeByDate.checked,
+                    media_quality: this.elements.mediaQuality.value,
+                    max_media_size_mb: parseInt(this.elements.maxFileSize.value)
+                };
+            }
+
+            openSettings() {
+                console.log('Opening settings modal...');
+                this.elements.settingsModal.classList.remove('hidden');
+            }
+
+            closeSettings() {
+                this.elements.settingsModal.classList.add('hidden');
+            }
+
+            resetSettings() {
+                this.elements.maxWorkers.value = 2;  // Reduced default to prevent crashes
+                this.elements.maxWorkersValue.textContent = '2';
+                this.elements.rateLimitMin.value = 2;
+                this.elements.rateLimitMax.value = 5;
+                this.elements.extractContent.checked = true;
+                this.elements.extractHashtags.checked = true;
+                this.elements.extractMentions.checked = true;
+                this.elements.previewWords.value = 50;
+                this.elements.downloadMedia.checked = true;
+                this.elements.createThumbnails.checked = true;
+                this.elements.organizeByDate.checked = true;
+                this.elements.mediaQuality.value = 'high';
+                this.elements.maxFileSize.value = 50;
+                this.elements.maxFileSizeValue.textContent = '50MB';
+            }
+
+            saveSettingsToStorage() {
+                const settings = this.getScrapingConfig();
+                localStorage.setItem('premiumScraperSettings', JSON.stringify(settings));
+                this.closeSettings();
+                this.showNotification('Cài đặt đã được lưu', 'success');
+            }
+
+            loadSettings() {
+                const savedSettings = localStorage.getItem('premiumScraperSettings');
+                if (savedSettings) {
+                    try {
+                        const settings = JSON.parse(savedSettings);
+                        
+                        this.elements.maxWorkers.value = Math.min(settings.max_workers || 2, 2);  // Cap at 2
+                        this.elements.maxWorkersValue.textContent = Math.min(settings.max_workers || 2, 2);
+                        this.elements.rateLimitMin.value = settings.rate_limit_min || 2;
+                        this.elements.rateLimitMax.value = settings.rate_limit_max || 5;
+                        this.elements.extractContent.checked = settings.extract_content !== false;
+                        this.elements.extractHashtags.checked = settings.extract_hashtags !== false;
+                        this.elements.extractMentions.checked = settings.extract_mentions !== false;
+                        this.elements.previewWords.value = settings.content_preview_words || 50;
+                        this.elements.downloadMedia.checked = settings.download_media !== false;
+                        this.elements.createThumbnails.checked = settings.create_thumbnails !== false;
+                        this.elements.organizeByDate.checked = settings.organize_by_date !== false;
+                        this.elements.mediaQuality.value = settings.media_quality || 'high';
+                        this.elements.maxFileSize.value = settings.max_media_size_mb || 50;
+                        this.elements.maxFileSizeValue.textContent = (settings.max_media_size_mb || 50) + 'MB';
+                    } catch (error) {
+                        console.error('Error loading settings:', error);
+                    }
+                }
+            }
+
+            // Theme functions
+            initializeTheme() {
+                const html = document.documentElement;
+                
+                if (localStorage.getItem('theme') === 'dark' || 
+                    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            }
+
+            toggleTheme() {
+                const html = document.documentElement;
+                html.classList.toggle('dark');
+                localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+            }
+
+            // Save functions
+            async saveResults(format) {
+                try {
+                    const response = await window.pywebview.api.save_premium_results(format);
+                    
+                    if (response.success) {
+                        this.showNotification(`Đã lưu ${response.count} kết quả dưới định dạng ${format.toUpperCase()}`, 'success');
+                    } else {
+                        this.showNotification(response.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Lỗi khi lưu kết quả: ' + error.message, 'error');
+                }
+            }
+
+            async openDownloadFolder() {
+                try {
+                    const response = await window.pywebview.api.open_download_folder();
+                    if (!response.success) {
+                        this.showNotification(response.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Không thể mở thư mục: ' + error.message, 'error');
+                }
+            }
+
+            // Copy all results in the format like original app
+            async copyAllResults() {
+                if (!this.results || this.results.length === 0) {
+                    this.showNotification('Không có kết quả để copy', 'warning');
+                    return;
+                }
+
+                try {
+                    let copyText = '';
+                    
+                    this.results.forEach(result => {
+                        if (result.success && result.post_data) {
+                            const data = result.post_data;
+                            const userName = data.user_name || 'Unknown';
+                            const likes = data.stats?.likes || '0';
+                            const comments = data.stats?.comments || '0';
+                            const shares = data.stats?.shares || '0';
+                            
+                            // Format like original app
+                            let commentsFormatted = comments === '0' ? '0 lượt bình luận' : `${comments} lượt bình luận`;
+                            let sharesFormatted = shares === '0' ? '0 lượt chia sẻ' : `${shares} lượt chia sẻ`;
+                            
+                            copyText += `Bài viết của ${userName}\n`;
+                            copyText += `        (${likes} lượt quan tâm, ${commentsFormatted}, ${sharesFormatted})\n\n`;
+                        }
+                    });
+                    
+                    // Copy to clipboard
+                    await navigator.clipboard.writeText(copyText);
+                    this.showNotification(`Đã copy ${this.results.length} kết quả vào clipboard`, 'success');
+                    
+                } catch (error) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = copyText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    this.showNotification('Đã copy kết quả vào clipboard', 'success');
+                }
+            }
+
+            // Notification system
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-500 text-white',
+                    error: 'bg-red-500 text-white',
+                    info: 'bg-blue-500 text-white',
+                    warning: 'bg-yellow-500 text-black'
+                };
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    info: 'fas fa-info-circle',
+                    warning: 'fas fa-exclamation-triangle'
+                };
+                
+                notification.className = `fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-lg ${colors[type]} fade-in max-w-md`;
+                notification.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="${icons[type]}"></i>
+                        <span class="font-medium">${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing PremiumScraper...');
+            window.premiumScraper = new PremiumScraper();
+            console.log('PremiumScraper initialized and ready!');
+        });
+    </script>
+</body>
+</html> 

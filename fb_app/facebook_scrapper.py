@@ -350,7 +350,7 @@ def save_to_txt(data_list, filename="facebook_data.txt"):
                     shares_formatted = f"{shares_number} lượt chia sẻ"
 
                 txtfile.write(f"Bài viết của {user_name}\n")
-                txtfile.write(f"        ({likes} lượt thích, {comments_formatted}, {shares_formatted})\n\n")
+                txtfile.write(f"        ({likes} lượt quan tâm, {comments_formatted}, {shares_formatted})\n\n")
         logging.info(f"Data saved to {filename}")
         print(f"Data saved to {filename}")
     except IOError as e:
